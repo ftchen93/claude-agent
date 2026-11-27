@@ -10,5 +10,6 @@ To learn and build claude agent
 - [`docs/qe-skills-design-review.md`](docs/qe-skills-design-review.md): design review of the QE-workflow-as-skills approach.
 - [`docs/qe-gap-analysis-and-revised-flow.md`](docs/qe-gap-analysis-and-revised-flow.md): gap analysis of the QE workflow against the playbook, with a revised flow, change backlog, metrics and rollout.
 - [`docs/agent-concepts-mapping.md`](docs/agent-concepts-mapping.md): how skills, agents and plugins map to classic agent development concepts (prompting, context, RAG, tools, memory, orchestration).
+- [`docs/comparison-safety-and-adoption.md`](docs/comparison-safety-and-adoption.md): how to compare with a company implementation safely, and how far to adopt the AI-native SDLC.
 - [`docs/references/ai-native-sdlc-playbook.md`](docs/references/ai-native-sdlc-playbook.md): reference notes on Anthropic's *AI-native SDLC playbook*, with a map to `qe-workflow`.
 - `.claude-plugin/marketplace.json`: makes this repo installable as a plugin marketplace.
