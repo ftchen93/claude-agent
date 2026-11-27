@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Definition of Ready result",
+  "type": "object",
+  "required": ["story_id", "conditions"],
+  "properties": {
+    "story_id": { "type": "string" },
+    "conditions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "status", "evidence"],
+        "properties": {
+          "id": { "type": "string" },
+          "status": { "enum": ["met", "not_met", "not_applicable", "unknown"] },
+          "evidence": { "type": "string" },
+          "owner": { "type": "string" }
+        }
+      }
+    },
+    "decision": { "enum": ["ready", "blocked"] },
+    "blocking": { "type": "array", "items": { "type": "string" } },
+    "decided_by": { "type": "string" },
+    "override_reason": { "type": "string" }
+  }
+}

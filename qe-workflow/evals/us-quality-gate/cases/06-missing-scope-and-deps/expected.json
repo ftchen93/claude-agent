@@ -1,0 +1,9 @@
+{
+  "decision": "fail",
+  "score_range": [
+    50,
+    69
+  ],
+  "notes": "Decent AC, but no scope, rules (PII?), deps, or limits on export size.",
+  "source": "PLACEHOLDER: example expectations written with the scaffold. Replace with scores from experienced QEs."
+}

@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Defects raised",
+  "type": "object",
+  "required": ["story_id", "defects"],
+  "properties": {
+    "story_id": { "type": "string" },
+    "defects": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["title", "severity", "steps_to_reproduce", "expected", "actual", "status"],
+        "properties": {
+          "key": { "type": "string", "description": "Tracker key once created" },
+          "title": { "type": "string" },
+          "severity": { "enum": ["Critical", "High", "Medium", "Low"] },
+          "suggested_priority": { "enum": ["P1", "P2", "P3", "P4"] },
+          "environment": { "type": "string" },
+          "build": { "type": "string" },
+          "steps_to_reproduce": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+          "expected": { "type": "string" },
+          "actual": { "type": "string" },
+          "evidence": { "type": "array", "items": { "type": "string" } },
+          "linked": { "type": "object", "description": "story, ac ids, tc ids, run id" },
+          "duplicate_of": { "type": "string" },
+          "status": { "enum": ["draft", "created", "linked_to_existing", "rejected"] }
+        }
+      }
+    }
+  }
+}

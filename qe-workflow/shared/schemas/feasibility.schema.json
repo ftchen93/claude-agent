@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Automation feasibility matrix",
+  "type": "object",
+  "required": ["story_id", "assessments"],
+  "properties": {
+    "story_id": { "type": "string" },
+    "assessments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["tc_id", "factors", "recommendation", "rationale"],
+        "properties": {
+          "tc_id": { "type": "string" },
+          "factors": {
+            "type": "object",
+            "required": ["repeatability", "stability", "technical_feasibility", "business_risk", "effort"],
+            "properties": {
+              "repeatability": { "type": "integer", "minimum": 1, "maximum": 5 },
+              "stability": { "type": "integer", "minimum": 1, "maximum": 5 },
+              "technical_feasibility": { "type": "integer", "minimum": 1, "maximum": 5 },
+              "business_risk": { "type": "integer", "minimum": 1, "maximum": 5 },
+              "effort": { "type": "integer", "minimum": 1, "maximum": 5 }
+            }
+          },
+          "feasibility_score": { "type": "number" },
+          "recommendation": { "enum": ["automate", "manual", "exploratory", "defer"] },
+          "suggested_layer": { "enum": ["unit", "api", "ui", "contract", "performance", "n/a"] },
+          "rationale": { "type": "string" }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "conditions": [
+    { "id": "all_ac_covered", "required": true, "description": "Every acceptance criterion maps to at least one executed test case." },
+    { "id": "pass_rate_met", "required": true, "description": "Pass rate meets the threshold in gates.json." },
+    { "id": "no_blocking_defects", "required": true, "description": "Open defects are within the allowed counts per severity in gates.json." },
+    { "id": "regression_executed", "required": true, "description": "Relevant regression suite executed on the release candidate build." },
+    { "id": "automation_merged", "required": false, "description": "Automation scripts for 'automate' cases are merged and running in the pipeline." },
+    { "id": "test_summary_published", "required": true, "description": "Test summary report published and linked to the story." }
+  ]
+}

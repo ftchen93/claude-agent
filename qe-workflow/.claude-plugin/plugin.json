@@ -1,0 +1,7 @@
+{
+  "name": "qe-workflow",
+  "version": "0.1.0",
+  "description": "Quality Engineering skills across the SDLC: story quality gate, Definition of Ready, test case generation, automation feasibility and scripting, test run triage, pipeline self-heal, defect raising and Definition of Done.",
+  "author": { "name": "QE Team" },
+  "keywords": ["qe", "testing", "quality-gate", "test-automation", "triage"]
+}

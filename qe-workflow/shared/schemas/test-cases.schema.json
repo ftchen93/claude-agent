@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Test cases",
+  "type": "object",
+  "required": ["story_id", "test_cases"],
+  "properties": {
+    "story_id": { "type": "string" },
+    "test_cases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "covers", "type", "priority", "steps", "expected"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^TC-[0-9]{3,}$" },
+          "title": { "type": "string" },
+          "covers": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+          "type": { "enum": ["functional", "negative", "boundary", "integration", "e2e", "non_functional", "exploratory_charter"] },
+          "technique": { "type": "string" },
+          "priority": { "enum": ["P1", "P2", "P3"] },
+          "preconditions": { "type": "array", "items": { "type": "string" } },
+          "test_data": { "type": "array", "items": { "type": "string" } },
+          "steps": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+          "expected": { "type": "array", "items": { "type": "string" }, "minItems": 1 }
+        }
+      }
+    },
+    "coverage": {
+      "type": "object",
+      "description": "Map of AC id -> list of TC ids. Every AC must appear."
+    },
+    "open_questions": { "type": "array", "items": { "type": "string" } }
+  }
+}

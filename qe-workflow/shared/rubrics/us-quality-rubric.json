@@ -1,0 +1,21 @@
+{
+  "scale": { "min": 0, "max": 4 },
+  "criteria": [
+    { "id": "role_and_value", "weight": 10, "na_allowed": false,
+      "question": "Does the story name the user role, the capability and the business value (As a / I want / So that)?" },
+    { "id": "acceptance_criteria", "weight": 25, "na_allowed": false,
+      "question": "Are there acceptance criteria that are specific, independent and verifiable (ideally Given/When/Then), covering the happy path and key negative paths?" },
+    { "id": "testability", "weight": 20, "na_allowed": false,
+      "question": "Are outcomes observable and unambiguous, with no vague terms (fast, user-friendly, etc.) left unquantified?" },
+    { "id": "business_rules_and_data", "weight": 15, "na_allowed": false,
+      "question": "Are business rules, validations, data constraints and error handling stated?" },
+    { "id": "scope_clarity", "weight": 10, "na_allowed": false,
+      "question": "Is it clear what is in and out of scope, and is the story small enough for one sprint?" },
+    { "id": "dependencies_and_assumptions", "weight": 10, "na_allowed": false,
+      "question": "Are dependencies (APIs, teams, feature flags, environments) and assumptions listed?" },
+    { "id": "non_functional", "weight": 5, "na_allowed": true,
+      "question": "Where relevant, are performance, security, accessibility or compliance expectations stated?" },
+    { "id": "ux_reference", "weight": 5, "na_allowed": true,
+      "question": "For UI work, is there a mockup, design link or clear description of the screen behaviour?" }
+  ]
+}

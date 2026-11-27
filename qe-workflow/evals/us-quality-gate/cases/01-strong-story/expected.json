@@ -1,0 +1,9 @@
+{
+  "decision": "pass",
+  "score_range": [
+    85,
+    100
+  ],
+  "notes": "Complete story; should pass comfortably.",
+  "source": "PLACEHOLDER: example expectations written with the scaffold. Replace with scores from experienced QEs."
+}

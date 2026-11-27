@@ -1,0 +1,51 @@
+{
+  "story_id": "PAY-101",
+  "conditions": [
+    {
+      "id": "quality_gate_passed",
+      "status": "met",
+      "evidence": "01-quality-report.json decision=pass, score 92.5"
+    },
+    {
+      "id": "ac_agreed",
+      "status": "met",
+      "evidence": "Three amigos comment on PAY-101, 2026-11-20"
+    },
+    {
+      "id": "estimated",
+      "status": "met",
+      "evidence": "Story points: 5"
+    },
+    {
+      "id": "dependencies_resolved",
+      "status": "met",
+      "evidence": "Promotions service live in staging"
+    },
+    {
+      "id": "designs_available",
+      "status": "met",
+      "evidence": "Figma Checkout v3"
+    },
+    {
+      "id": "test_environment_identified",
+      "status": "met",
+      "evidence": "staging-eu, flag checkout_promo enabled"
+    },
+    {
+      "id": "test_data_identified",
+      "status": "unknown",
+      "evidence": "No expired code exists in staging; source not confirmed",
+      "owner": "QE"
+    },
+    {
+      "id": "nfr_identified",
+      "status": "met",
+      "evidence": "p95 500 ms in story"
+    }
+  ],
+  "decision": "blocked",
+  "blocking": [
+    "test_data_identified: unknown"
+  ],
+  "decided_by": "skill"
+}
