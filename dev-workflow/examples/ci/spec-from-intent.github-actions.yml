@@ -1,0 +1,72 @@
+# Spec from intent: EXAMPLE
+# Copy to .github/workflows/spec-from-intent.yml in the repo that holds sdlc/<ID>/intent.md.
+#
+# When an accepted intent.md lands on main (the PO accepted it by merging), Claude drafts
+# spec.md with the organisation's policy skills. This job opens it as a PR, so the PO's
+# first involvement is the review. Claude never pushes.
+
+name: Spec from intent
+
+on:
+  push:
+    branches: [main]
+    paths: ["sdlc/*/intent.md"]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+env:
+  PLUGIN_REPO: ftchen93/claude-agent   # CHANGE ME
+  PLUGIN_REF: main                     # CHANGE ME: pin a tag or SHA
+  CLAUDE_CODE_VERSION: latest          # CHANGE ME
+
+jobs:
+  spec:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ env.PLUGIN_REPO }}
+          ref: ${{ env.PLUGIN_REF }}
+          path: .sdlc-plugins
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install -g "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}"
+      - run: |
+          git config user.name "sdlc-bot"
+          git config user.email "sdlc-bot@users.noreply.github.com"
+
+      - name: Draft a spec for each changed intent
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # CHANGE ME: add --plugin-dir for your organisation's policy-skill plugin(s).
+        run: |
+          for intent in $(git diff --name-only HEAD~1 HEAD -- 'sdlc/*/intent.md'); do
+            dir=$(dirname "$intent"); id=$(basename "$dir")
+            [ -f "$dir/spec.md" ] && { echo "$id already has a spec; skipping"; continue; }
+            git switch -c "spec/$id" main
+            claude -p "Use the spec-design skill to write $dir/spec.md from $intent. \
+            Apply every policy skill available. Do not edit any other file." \
+              --plugin-dir .sdlc-plugins/dev-workflow \
+              --permission-mode dontAsk \
+              --allowedTools "Skill,Read,Grep,Glob,Write,Edit,Bash(python3:*)" \
+              --max-budget-usd 4 --output-format json < /dev/null > "spec-$id.json"
+            python3 .sdlc-plugins/dev-workflow/scripts/check_sdlc.py spec "$dir/spec.md" --intent "$intent" | tee "check-$id.txt" || true
+            git add "$dir/spec.md"   # only the spec is committed, whatever else was touched
+            git commit -m "Draft spec for $id from intent.md"
+            git push origin "spec/$id"
+            { echo "Draft spec generated from \`$intent\`. **Review the Areas of concern first.**"; echo;
+              echo '```'; cat "check-$id.txt"; echo '```'; } > body.md
+            gh pr create --draft --base main --head "spec/$id" --title "Spec: $id" --body-file body.md
+            git switch main
+          done

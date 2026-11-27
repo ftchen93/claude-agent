@@ -1,5 +1,9 @@
 # qe-workflow plugin
 
+> Pairs with [`dev-workflow`](../dev-workflow/README.md), which covers Plan, Design, Build and
+> Review. With both installed, test design runs in the Design stage, and the implementation
+> plan cites these test cases as its Proof.
+
 Quality Engineering skills for the SDLC. Each skill is one stage. The stages hand off
 through files with fixed schemas, and every gate decision is computed by a script rather
 than by the model.

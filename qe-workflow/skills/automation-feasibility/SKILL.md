@@ -5,7 +5,10 @@ description: Assess which test cases should be automated, kept manual, explored,
 
 # Automation Feasibility
 
-Paths are relative to this skill's directory.
+Paths are relative to this skill's directory. Resolve them to absolute paths, and run
+each script as one simple command (no `cd`, `&&`, `;` or pipes), so it also works in
+headless runs that only allow simple commands. If one command is denied, retry it as a
+single simple command before concluding that commands are blocked.
 
 ## Inputs
 - `qe-artifacts/<STORY-ID>/03-test-cases.json`. If it is missing, run

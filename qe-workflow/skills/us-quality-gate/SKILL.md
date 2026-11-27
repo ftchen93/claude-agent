@@ -9,10 +9,15 @@ Scores a story on a fixed rubric and records a pass/fail decision. **You score e
 criterion with evidence; the script computes the total and the decision.** Never state a
 pass/fail yourself before the script has run.
 
-Paths are relative to this skill's directory.
+Paths are relative to this skill's directory. Resolve them to absolute paths, and run
+each script as one simple command (no `cd`, `&&`, `;` or pipes), so it also works in
+headless runs that only allow simple commands. If one command is denied, retry it as a
+single simple command before concluding that commands are blocked.
 
 ## Inputs
-- A story ID or the story text.
+- A story ID, the story text, or `sdlc/<STORY-ID>/intent.md` from
+  **dev-workflow:intent-capture**. An intent drafted by that skill should usually pass,
+  because its interview asks the rubric's questions up front; this gate then confirms it.
   - If a tracker tool is available (e.g. Jira MCP), fetch the story, its description,
     acceptance criteria, attachments list and linked issues.
   - Otherwise ask the user to paste it.

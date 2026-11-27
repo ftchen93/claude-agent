@@ -8,7 +8,10 @@ description: Triage failed tests from a pipeline or test run: classify each fail
 Classifies every failure and decides where it goes next. This skill is the router of the
 workflow; read `../../shared/references/triage-taxonomy.md` first.
 
-Paths are relative to this skill's directory.
+Paths are relative to this skill's directory. Resolve them to absolute paths, and run
+each script as one simple command (no `cd`, `&&`, `;` or pipes), so it also works in
+headless runs that only allow simple commands. If one command is denied, retry it as a
+single simple command before concluding that commands are blocked.
 
 ## Inputs
 - A run ID or pipeline URL. If a CI tool is available (GitHub Actions, GitLab, Jenkins via

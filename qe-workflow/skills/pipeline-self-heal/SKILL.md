@@ -8,7 +8,10 @@ description: Repair broken automated tests whose failure triage classified as lo
 Fixes **the test, never the product, and never the expectation.** A heal that makes a
 real bug pass is the worst outcome this workflow can produce.
 
-Paths are relative to this skill's directory.
+Paths are relative to this skill's directory. Resolve them to absolute paths, and run
+each script as one simple command (no `cd`, `&&`, `;` or pipes), so it also works in
+headless runs that only allow simple commands. If one command is denied, retry it as a
+single simple command before concluding that commands are blocked.
 
 ## Preconditions (all of them, or stop)
 - A triage file `06-triage-<RUN-ID>.json` exists.

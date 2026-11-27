@@ -1,0 +1,23 @@
+{
+  "story_id": "PAY-101",
+  "test_cases": [
+    {"id": "TC-001", "title": "applies SAVE10 on a $20.00 subtotal", "covers": ["AC-1"], "type": "boundary", "technique": "boundary value", "priority": "P1",
+     "preconditions": ["flag checkout_promo on"], "test_data": ["subtotal 20.00", "code SAVE10"], "steps": ["Apply SAVE10"], "expected": ["total 18.00", "line 'SAVE10 -$2.00'"]},
+    {"id": "TC-002", "title": "rounds the discount half up", "covers": ["AC-1"], "type": "boundary", "technique": "boundary value", "priority": "P2",
+     "test_data": ["subtotal 20.05"], "steps": ["Apply SAVE10"], "expected": ["discount 2.01", "total 18.04"]},
+    {"id": "TC-003", "title": "rejects an expired code", "covers": ["AC-2"], "type": "negative", "priority": "P1",
+     "test_data": ["code OLD2020 (expired)"], "steps": ["Apply OLD2020"], "expected": ["total unchanged", "message 'This code has expired'"]},
+    {"id": "TC-004", "title": "rejects an unknown code", "covers": ["AC-3"], "type": "negative", "priority": "P1",
+     "steps": ["Apply NOPE"], "expected": ["message 'Code not recognised'", "total unchanged"]},
+    {"id": "TC-005", "title": "enforces minimum spend at $19.99", "covers": ["AC-4"], "type": "boundary", "technique": "boundary value", "priority": "P1",
+     "test_data": ["subtotal 19.99"], "steps": ["Apply SAVE10"], "expected": ["message 'Minimum spend $20'", "no discount"]},
+    {"id": "TC-006", "title": "second code replaces the first", "covers": ["AC-5"], "type": "functional", "priority": "P2",
+     "steps": ["Apply SAVE10", "Apply SAVE15"], "expected": ["only SAVE15 line shown", "total reflects 15%"]},
+    {"id": "TC-007", "title": "removes the code when the subtotal drops below $20", "covers": ["AC-6"], "type": "functional", "technique": "state transition", "priority": "P1",
+     "steps": ["Apply SAVE10 on 25.00", "Remove an item so the subtotal is 15.00"], "expected": ["code removed", "message 'Minimum spend $20'"]},
+    {"id": "TC-008", "title": "explore the cache window after a code expires", "covers": ["AC-2"], "type": "exploratory_charter", "priority": "P2",
+     "steps": ["Expire a code in staging and retry within 60 s"], "expected": ["behaviour matches the PO decision on concern 1"]}
+  ],
+  "coverage": {"AC-1": ["TC-001", "TC-002"], "AC-2": ["TC-003", "TC-008"], "AC-3": ["TC-004"], "AC-4": ["TC-005"], "AC-5": ["TC-006"], "AC-6": ["TC-007"]},
+  "open_questions": []
+}

@@ -193,6 +193,20 @@ along the critical path of every story.
 | 12 | Flaky route → quarantine PR instead of a ticket | Edit triage/heal | P2 | S |
 | 13 | QE control bands (`bands.yaml`) for CI failure rate, flaky rate and escaped defects; incident → eval procedure | New example | P3 | M |
 
+### Implementation status (27 Nov 2026)
+
+| # | Status |
+|---|---|
+| 1 | **Done**: test-case-generation starts from spec.md in Design and no longer waits for DoR; `implementation-plan` cites TC IDs in Proof, enforced by `check_sdlc.py plan` |
+| 2 | **Done**: `dev-workflow/templates/REVIEW.md` with a QE pass, plus the `pr-review` skill and `pr-reviewer` agent |
+| 3 | **Done**: `dev-workflow/hooks/guard_edits.py` (assertion changes, fix mode, protected paths), tested in a real session |
+| 4 | **Done**: `dev-workflow/templates/CLAUDE.md` with a verification block |
+| 5 | **Partly done**: `agent-evals` CI example; calibrating with real QE-scored stories is still to do |
+| 6 | Open: team decision on the source of truth |
+| 7 | **Partly done**: `intent-capture` does the rubric-guided elicitation; the advisory/blocking gate setting is still to do |
+| 11 | **Done**: `test-verifier` agent |
+| 8, 9, 10, 12, 13 | Not started |
+
 Nothing gets deleted. The nine skills, three agents, scripts, schemas and CI example all
 stay; they move to new positions in the flow.
 

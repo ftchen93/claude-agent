@@ -23,6 +23,6 @@ for case_dir in "$HERE"/cases/*/; do
       --plugin-dir "$PLUGIN" \
       --permission-mode acceptEdits \
       --allowedTools "Read,Write,Edit,Bash(python3:*)" \
-      > "$work/transcript.txt" 2>&1) || echo "   (claude exited non-zero; see $work/transcript.txt)"
+      < /dev/null > "$work/transcript.txt" 2>&1) || echo "   (claude exited non-zero; see $work/transcript.txt)"
   done
 done

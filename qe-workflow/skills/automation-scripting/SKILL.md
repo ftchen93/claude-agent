@@ -5,7 +5,10 @@ description: Write automated test scripts for test cases marked 'automate', foll
 
 # Automation Scripting
 
-Paths are relative to this skill's directory.
+Paths are relative to this skill's directory. Resolve them to absolute paths, and run
+each script as one simple command (no `cd`, `&&`, `;` or pipes), so it also works in
+headless runs that only allow simple commands. If one command is denied, retry it as a
+single simple command before concluding that commands are blocked.
 
 ## Inputs
 - `qe-artifacts/<STORY-ID>/04-feasibility.json`. Script only the cases with

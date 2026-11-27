@@ -1,0 +1,35 @@
+# Checks for this repo's plugins. No API key needed, so it runs on every PR, including forks.
+name: Plugin CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  scripts:
+    name: Script unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: git config --global user.email ci@example.com && git config --global user.name ci
+      - run: python -m unittest discover -s tests -v
+
+  validate:
+    name: Validate plugins and marketplace
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install -g @anthropic-ai/claude-code
+      - run: claude plugin validate .
+      - run: claude plugin validate qe-workflow
+      - run: claude plugin validate dev-workflow

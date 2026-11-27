@@ -8,7 +8,10 @@ description: Check a user story against the Definition of Ready (DoR) checklist 
 Checks that every required condition holds. **Any required condition that is not `met`
 blocks the story, including `unknown`.** The script decides; you gather the evidence.
 
-Paths are relative to this skill's directory.
+Paths are relative to this skill's directory. Resolve them to absolute paths, and run
+each script as one simple command (no `cd`, `&&`, `;` or pipes), so it also works in
+headless runs that only allow simple commands. If one command is denied, retry it as a
+single simple command before concluding that commands are blocked.
 
 ## Inputs
 - `qe-artifacts/<STORY-ID>/01-quality-report.json`. If it is missing, stop and tell the

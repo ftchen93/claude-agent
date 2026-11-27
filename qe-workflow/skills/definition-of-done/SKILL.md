@@ -7,7 +7,10 @@ description: Decide whether testing for a story is complete using Definition of 
 
 The exit gate, symmetric with DoR. Thresholds live in `../../shared/config/gates.json`.
 
-Paths are relative to this skill's directory.
+Paths are relative to this skill's directory. Resolve them to absolute paths, and run
+each script as one simple command (no `cd`, `&&`, `;` or pipes), so it also works in
+headless runs that only allow simple commands. If one command is denied, retry it as a
+single simple command before concluding that commands are blocked.
 
 ## Inputs
 - `01-quality-report.json` (AC list), `03-test-cases.json` (coverage),

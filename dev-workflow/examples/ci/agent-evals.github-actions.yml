@@ -1,0 +1,42 @@
+# Continuous evals for the plugins: EXAMPLE
+# Copy to .github/workflows/agent-evals.yml in the repo that holds the plugins.
+#
+# The playbook's "continuous evals in CI" play: the skills steer the agent, so changes to
+# them get regression-tested like code. Runs on PRs that touch a plugin and nightly.
+# The gate fails when the eval suite fails; a skill change that lowers quality is reviewed
+# before it merges. Needs the ANTHROPIC_API_KEY secret and an eval budget.
+
+name: Agent evals
+
+on:
+  pull_request:
+    paths: ["qe-workflow/**", "dev-workflow/**", "CLAUDE.md", ".claude/**"]
+  schedule:
+    - cron: "17 2 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  us-quality-gate:
+    # Fork PRs don't get secrets; skip them rather than fail.
+    if: github.event_name == 'schedule' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install -g @anthropic-ai/claude-code   # pin a version in production
+      - name: Run the eval cases (3 runs each, for consistency)
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: qe-workflow/evals/us-quality-gate/run_skill.sh "$RUNNER_TEMP/evals" 3
+      - name: Score against expected outcomes (this is the gate)
+        run: python3 qe-workflow/evals/us-quality-gate/run_eval.py "$RUNNER_TEMP/evals" | tee -a "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: eval-results
+          path: ${{ runner.temp }}/evals

@@ -5,7 +5,10 @@ description: Draft and raise defects for product bugs found in testing or triage
 
 # Defect Raising
 
-Paths are relative to this skill's directory.
+Paths are relative to this skill's directory. Resolve them to absolute paths, and run
+each script as one simple command (no `cd`, `&&`, `;` or pipes), so it also works in
+headless runs that only allow simple commands. If one command is denied, retry it as a
+single simple command before concluding that commands are blocked.
 
 ## Inputs
 - Failures with `route: defect-raising` from `06-triage-<RUN-ID>.json`, or a bug the

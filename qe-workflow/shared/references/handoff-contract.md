@@ -5,6 +5,18 @@ traceable and each stage can be re-run independently.
 
 ## Location
 
+Development artifacts from the **dev-workflow** plugin live next to the QE records, keyed by
+the same ID:
+
+```
+sdlc/<STORY-ID>/
+  intent.md    # dev-workflow:intent-capture       (Plan; PO accepts)
+  spec.md      # dev-workflow:spec-design          (Design; PO accepts)
+  plan.md      # dev-workflow:implementation-plan  (Build; engineer accepts; Proof cites TC IDs)
+```
+
+QE records:
+
 ```
 qe-artifacts/<STORY-ID>/
   00-story.md                  # source story, as fetched or pasted

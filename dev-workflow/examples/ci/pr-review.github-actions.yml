@@ -1,0 +1,92 @@
+# Agentic PR review: EXAMPLE
+# Copy to .github/workflows/pr-review.yml in the product repo and change each CHANGE ME.
+#
+# Every same-repo PR gets the same review passes from REVIEW.md (bugs, security,
+# compliance with spec.md/plan.md, QE). The pr-reviewer agent is read-only; this job
+# posts the review. Findings inform the code owner and never approve or block on their
+# own. Branch protection still requires a code owner. The tally is exposed as step
+# outputs, so you can choose to gate on it later.
+
+name: PR review
+
+on:
+  pull_request:
+    types: [opened, synchronize, ready_for_review]
+
+permissions:
+  contents: read
+  pull-requests: write          # to post the review comment (done by this job, not Claude)
+
+env:
+  PLUGIN_REPO: ftchen93/claude-agent   # CHANGE ME: repo holding the plugins
+  PLUGIN_REF: main                     # CHANGE ME: pin a tag or SHA
+  CLAUDE_CODE_VERSION: latest          # CHANGE ME: pin a version
+
+jobs:
+  review:
+    # Skip drafts and forks: fork PRs are untrusted input, and secrets aren't available to them.
+    if: >-
+      github.event.pull_request.draft == false &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ env.PLUGIN_REPO }}
+          ref: ${{ env.PLUGIN_REF }}
+          path: .sdlc-plugins
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install -g "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}"
+
+      - name: Review with the pr-reviewer agent
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+          TITLE: ${{ github.event.pull_request.title }}
+          BRANCH: ${{ github.event.pull_request.head.ref }}
+        run: |
+          claude -p "Review the change ${BASE}...${HEAD} (PR title: ${TITLE}; branch: ${BRANCH}). \
+          Use REVIEW.md at the repo root, and sdlc/<ID>/spec.md and plan.md plus \
+          qe-artifacts/<ID>/03-test-cases.json if they exist for this change. \
+          Return only the review in Markdown, ending with the REVIEW-TALLY line." \
+            --plugin-dir .sdlc-plugins/dev-workflow \
+            --plugin-dir .sdlc-plugins/qe-workflow \
+            --agent dev-workflow:pr-reviewer \
+            --permission-mode dontAsk \
+            --allowedTools "Skill,Read,Grep,Glob,Bash(git diff:*),Bash(git log:*),Bash(git show:*)" \
+            --max-budget-usd 4 \
+            --output-format json < /dev/null > review.json
+          python3 -c "import json;print(json.load(open('review.json'))['result'])" > review.md
+
+      - name: Read the tally
+        id: tally
+        run: |
+          line=$(grep -Eo 'REVIEW-TALLY: important=[0-9]+ nit=[0-9]+ qe_gaps=[0-9]+' review.md | tail -1 || true)
+          echo "line=${line:-REVIEW-TALLY: missing}" >> "$GITHUB_OUTPUT"
+          for k in important nit qe_gaps; do
+            v=$(echo "$line" | grep -Eo "$k=[0-9]+" | cut -d= -f2)
+            echo "$k=${v:-0}" >> "$GITHUB_OUTPUT"
+          done
+
+      - name: Post the review
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          { echo "### Automated review (informs the code owner; doesn't approve or block)"; echo; cat review.md; } > body.md
+          gh pr comment "$PR" --body-file body.md
+
+      # Optional, once the team trusts the findings: fail the check on Important findings.
+      # - if: steps.tally.outputs.important != '0'
+      #   run: exit 1

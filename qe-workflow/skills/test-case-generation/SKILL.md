@@ -1,17 +1,28 @@
 ---
 name: test-case-generation
-description: Generate test cases from a ready user story's acceptance criteria, with traceability from each AC to test cases. Use when asked to write, design, generate or derive test cases or test scenarios for a story or feature.
+description: Generate test cases from the acceptance criteria in a spec, intent or user story, with traceability from each AC to test cases. Runs in the Design stage, before build, so the implementation plan can cite the test cases as its Proof. Use when asked to write, design, generate or derive test cases or test scenarios for a story, spec or feature.
 ---
 
 # Test Case Generation
 
-Paths are relative to this skill's directory.
+Paths are relative to this skill's directory. Resolve them to absolute paths, and run
+each script as one simple command (no `cd`, `&&`, `;` or pipes), so it also works in
+headless runs that only allow simple commands. If one command is denied, retry it as a
+single simple command before concluding that commands are blocked.
 
 ## Inputs
-- `qe-artifacts/<STORY-ID>/02-dor-result.json` with `decision: ready`. If it is blocked
-  or missing, stop and say so. The user may explicitly choose to proceed anyway; if they
-  do, record that in `open_questions`.
-- `00-story.md` and the `acceptance_criteria_extracted` list from `01-quality-report.json`.
+Test design runs in the **Design stage, in parallel with spec review**, so the
+implementation plan can cite these test cases as its Proof. Use the most refined source
+available:
+1. `sdlc/<STORY-ID>/spec.md` (from **dev-workflow:spec-design**). Preferred: it has the
+   final AC IDs and the *Test strategy notes*.
+2. Otherwise `sdlc/<STORY-ID>/intent.md`, or `qe-artifacts/<STORY-ID>/00-story.md` with
+   the `acceptance_criteria_extracted` list from `01-quality-report.json`.
+
+Keep the AC IDs exactly as the source numbers them. If
+`qe-artifacts/<STORY-ID>/02-dor-result.json` exists and says `blocked`, carry its blockers
+into `open_questions`. DoR no longer has to pass before test design starts, but its blockers
+must be visible.
 
 ## Steps
 1. For each AC, design tests using the techniques that fit:
@@ -34,9 +45,14 @@ Paths are relative to this skill's directory.
    ```bash
    python3 ../../shared/scripts/validate.py test-cases qe-artifacts/<STORY-ID>/03-test-cases.json
    ```
-5. Show the user a summary table (ID, title, covers, type, priority) and the open
+5. Set `suggested_layer` thinking for each case now (unit, API or UI; the lowest layer that
+   proves the behaviour) and say in `technique` or the title if a case should stay manual.
+   The **automation-feasibility** skill is optional after this.
+6. Show the user a summary table (ID, title, covers, type, priority) and the open
    questions. **A human reviews the cases before they are pushed to a test management
    tool** (TestRail, Xray, Zephyr). Push only after approval, if a tool is available.
+7. Next step: the engineer's **dev-workflow:implementation-plan** cites these TC IDs in
+   its Proof section. P1 scripted cases must all be cited.
 
 ## Rules
 - Do not duplicate cases. Merge cases that differ only in data into one case with a data

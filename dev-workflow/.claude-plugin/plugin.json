@@ -1,0 +1,7 @@
+{
+  "name": "dev-workflow",
+  "version": "0.1.0",
+  "description": "Development-side SDLC skills that pair with qe-workflow: intent capture, requirements and design spec, implementation plan, build with tests and a feedback loop, and agentic PR review. Based on the AI-native SDLC playbook.",
+  "author": { "name": "QE Team" },
+  "keywords": ["sdlc", "intent", "spec", "plan-mode", "code-review", "hooks"]
+}

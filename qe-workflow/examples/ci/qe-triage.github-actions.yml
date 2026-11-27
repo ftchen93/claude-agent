@@ -85,7 +85,7 @@ jobs:
             --permission-mode dontAsk \
             --allowedTools "Skill,Read,Write,Glob,Grep,Bash(python3:*)" \
             --max-budget-usd 3 \
-            --output-format json > triage-claude.json
+            --output-format json < /dev/null > triage-claude.json
 
       - name: Validate the triage file
         run: python3 .qe-plugin/qe-workflow/shared/scripts/validate.py triage "qe-artifacts/runs/${RUN_ID}/06-triage-${RUN_ID}.json"
@@ -176,7 +176,7 @@ jobs:
             --permission-mode dontAsk \
             --allowedTools "Skill,Read,Edit,Write,Glob,Grep,Bash(python3:*),Bash(git checkout:*),Bash(git switch:*),Bash(git add:*),Bash(git commit:*),Bash(git diff:*),Bash(git status:*),Bash(git log:*),Bash(git restore:*),Bash(${TEST_CMD}:*)" \
             --max-budget-usd 8 \
-            --output-format json > heal-claude.json
+            --output-format json < /dev/null > heal-claude.json
 
       - name: Check the agent left a branch
         id: branch
