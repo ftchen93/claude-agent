@@ -1,0 +1,74 @@
+{
+  "story_id": "PAY-101",
+  "criteria": [
+    {
+      "id": "role_and_value",
+      "score": 4,
+      "evidence": "'As a returning customer ... so that I pay the discounted price advertised in our email campaigns.'"
+    },
+    {
+      "id": "acceptance_criteria",
+      "score": 4,
+      "evidence": "AC-1..AC-5 in Given/When/Then, covering valid, expired, unknown, minimum spend and replacement."
+    },
+    {
+      "id": "testability",
+      "score": 4,
+      "evidence": "Exact messages, rounding rule (2 decimals, half up) and discount line format given."
+    },
+    {
+      "id": "business_rules_and_data",
+      "score": 3,
+      "evidence": "Case-insensitive, max 20 alphanumeric, subtotal only.",
+      "question_for_author": "What happens to an applied code if the cart drops below $20 after it is applied?"
+    },
+    {
+      "id": "scope_clarity",
+      "score": 4,
+      "evidence": "In scope: web checkout. Out of scope: mobile, gift cards, stacking."
+    },
+    {
+      "id": "dependencies_and_assumptions",
+      "score": 3,
+      "evidence": "Promotions service and flag checkout_promo named.",
+      "question_for_author": "What should checkout show if the promotions service is unavailable?"
+    },
+    {
+      "id": "non_functional",
+      "score": 3,
+      "evidence": "p95 < 500 ms for validation.",
+      "question_for_author": "Is there rate limiting against code brute-forcing?"
+    },
+    {
+      "id": "ux_reference",
+      "score": 4,
+      "evidence": "Figma: Checkout v3, frame 'Promo field'."
+    }
+  ],
+  "acceptance_criteria_extracted": [
+    {
+      "id": "AC-1",
+      "text": "Valid unexpired code on cart >= $20 reduces total by 10%, rounded half up, discount line 'SAVE10 -$X.XX'."
+    },
+    {
+      "id": "AC-2",
+      "text": "Expired code: total unchanged, message 'This code has expired'."
+    },
+    {
+      "id": "AC-3",
+      "text": "Unknown code: message 'Code not recognised', total unchanged."
+    },
+    {
+      "id": "AC-4",
+      "text": "Cart below $20: message 'Minimum spend $20'."
+    },
+    {
+      "id": "AC-5",
+      "text": "One active code per order; a second replaces the first."
+    }
+  ],
+  "total_score": 92.5,
+  "decision": "pass",
+  "hard_fail_reasons": [],
+  "decided_by": "skill"
+}

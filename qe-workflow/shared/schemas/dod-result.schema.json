@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Definition of Done (testing complete) result",
+  "type": "object",
+  "required": ["story_id", "metrics", "conditions"],
+  "properties": {
+    "story_id": { "type": "string" },
+    "metrics": {
+      "type": "object",
+      "required": ["ac_total", "ac_covered_executed", "tests_executed", "tests_passed", "open_defects"],
+      "properties": {
+        "ac_total": { "type": "integer", "minimum": 0 },
+        "ac_covered_executed": { "type": "integer", "minimum": 0 },
+        "tests_executed": { "type": "integer", "minimum": 0 },
+        "tests_passed": { "type": "integer", "minimum": 0 },
+        "open_defects": { "type": "object", "description": "severity -> count" }
+      }
+    },
+    "conditions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "status", "evidence"],
+        "properties": {
+          "id": { "type": "string" },
+          "status": { "enum": ["met", "not_met", "not_applicable", "unknown"] },
+          "evidence": { "type": "string" }
+        }
+      }
+    },
+    "decision": { "enum": ["done", "not_done"] },
+    "blocking": { "type": "array", "items": { "type": "string" } },
+    "decided_by": { "type": "string" }
+  }
+}

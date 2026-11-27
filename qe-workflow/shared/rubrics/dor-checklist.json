@@ -1,0 +1,12 @@
+{
+  "conditions": [
+    { "id": "quality_gate_passed", "required": true,  "description": "User story passed the quality gate (01-quality-report.json decision = pass, or an approved override)." },
+    { "id": "ac_agreed", "required": true, "description": "Acceptance criteria reviewed and agreed by PO, Dev and QE (three amigos)." },
+    { "id": "estimated", "required": true, "description": "Story is estimated and fits in a sprint." },
+    { "id": "dependencies_resolved", "required": true, "description": "Blocking dependencies are resolved or have a committed date." },
+    { "id": "designs_available", "required": false, "description": "UX designs attached (required only for UI stories)." },
+    { "id": "test_environment_identified", "required": true, "description": "Target test environment is identified and available." },
+    { "id": "test_data_identified", "required": true, "description": "Required test data is identified, and its source or creation method is known." },
+    { "id": "nfr_identified", "required": false, "description": "Non-functional requirements identified where applicable." }
+  ]
+}

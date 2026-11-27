@@ -1,0 +1,23 @@
+{
+  "us_quality_gate": {
+    "pass_threshold": 70,
+    "rubric_file": "shared/rubrics/us-quality-rubric.json",
+    "hard_fail": [
+      { "criterion": "acceptance_criteria", "min_score": 2 },
+      { "criterion": "testability", "min_score": 2 }
+    ]
+  },
+  "definition_of_ready": {
+    "checklist_file": "shared/rubrics/dor-checklist.json"
+  },
+  "definition_of_done": {
+    "checklist_file": "shared/rubrics/dod-checklist.json",
+    "min_requirement_coverage_pct": 100,
+    "min_pass_rate_pct": 95,
+    "max_open_defects": { "critical": 0, "high": 0 }
+  },
+  "self_heal": {
+    "allowed_categories": ["locator_drift", "timing_wait", "test_data_refresh"],
+    "max_files_changed": 3
+  }
+}

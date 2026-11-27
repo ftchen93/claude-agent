@@ -1,0 +1,9 @@
+{
+  "decision": "fail",
+  "score_range": [
+    45,
+    69
+  ],
+  "notes": "Happy path only; no expiry, invalid email, password rules.",
+  "source": "PLACEHOLDER: example expectations written with the scaffold. Replace with scores from experienced QEs."
+}

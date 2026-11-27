@@ -1,0 +1,12 @@
+{
+  "decision": "fail",
+  "score_range": [
+    0,
+    25
+  ],
+  "expected_hard_fail": [
+    "acceptance_criteria"
+  ],
+  "notes": "No AC at all; hard fail.",
+  "source": "PLACEHOLDER: example expectations written with the scaffold. Replace with scores from experienced QEs."
+}

@@ -1,0 +1,11 @@
+{
+  "name": "qe-marketplace",
+  "owner": { "name": "QE Team" },
+  "plugins": [
+    {
+      "name": "qe-workflow",
+      "source": "./qe-workflow",
+      "description": "Quality Engineering skills across the SDLC: story quality gate, DoR, test design, automation, triage, self-heal, defects and DoD."
+    }
+  ]
+}

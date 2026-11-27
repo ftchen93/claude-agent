@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "User story quality report (model output, before scoring script)",
+  "type": "object",
+  "required": ["story_id", "criteria"],
+  "properties": {
+    "story_id": { "type": "string" },
+    "criteria": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "score", "evidence"],
+        "properties": {
+          "id": { "type": "string" },
+          "score": { "type": ["integer", "null"], "minimum": 0, "maximum": 4 },
+          "evidence": { "type": "string" },
+          "question_for_author": { "type": "string" }
+        }
+      }
+    },
+    "acceptance_criteria_extracted": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "text"],
+        "properties": { "id": { "type": "string" }, "text": { "type": "string" } }
+      }
+    },
+    "total_score": { "type": "number" },
+    "decision": { "enum": ["pass", "fail"] },
+    "hard_fail_reasons": { "type": "array", "items": { "type": "string" } },
+    "decided_by": { "type": "string" },
+    "override_reason": { "type": "string" }
+  }
+}

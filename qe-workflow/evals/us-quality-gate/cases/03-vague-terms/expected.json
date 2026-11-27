@@ -1,0 +1,12 @@
+{
+  "decision": "fail",
+  "score_range": [
+    10,
+    45
+  ],
+  "expected_hard_fail": [
+    "testability"
+  ],
+  "notes": "AC present but untestable adjectives.",
+  "source": "PLACEHOLDER: example expectations written with the scaffold. Replace with scores from experienced QEs."
+}
