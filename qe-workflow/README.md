@@ -42,21 +42,45 @@ user story ──> [us-quality-gate] ──> [definition-of-ready] ──> (deve
 | `defect-raising` | `08-defects.json` | duplicate check; human confirms before anything is created |
 | `definition-of-done` | `09-dod-result.json` | `scripts/check_dod.py` (coverage, pass rate, open defects) |
 
+## Agents
+
+Agents are separate Claude instances that **use** the skills above. Each has its own
+context, tool list and model. The skills stay the single source of truth for how each step
+is done.
+
+| Agent | Uses skills | Why it is an agent |
+|---|---|---|
+| `story-gatekeeper` | us-quality-gate, definition-of-ready | Independent judge: never sees the conversation that wrote the story |
+| `triage-analyst` | testrun-triage | Reads large logs in its own context and returns only the routed result. Runs headless in CI |
+| `self-heal-fixer` | pipeline-self-heal | Isolated git worktree when used as a subagent. In CI, restricted by the tool allowlist |
+
+Use them in a session by name (e.g. "use the story-gatekeeper agent on PAY-101"), or
+headless: `claude -p "..." --plugin-dir ./qe-workflow --agent qe-workflow:triage-analyst`.
+
+Plugin agents ignore `permissionMode`, `hooks` and `mcpServers` in their frontmatter.
+Enforce limits with `--allowedTools` and `--permission-mode dontAsk` in headless runs,
+or copy an agent into `.claude/agents/` if you need those fields.
+
+See [`examples/ci/`](examples/ci/README.md) for a GitHub Actions workflow that runs triage
+on every failed test run and, after a person approves, self-heal as a draft PR.
+
 ## Layout
 
 ```
 qe-workflow/
   .claude-plugin/plugin.json
   skills/<skill>/SKILL.md (+ scripts/)
+  agents/                    <- story-gatekeeper, triage-analyst, self-heal-fixer
   shared/
     config/gates.json        <- thresholds and limits: tune these, not the prompts
     rubrics/                 <- story rubric (md anchors + json weights), DoR and DoD checklists
     references/              <- handoff contract, triage taxonomy, severity matrix,
                                 automation conventions (TEMPLATE), glossary
     schemas/                 <- JSON Schemas for every handoff file
-    scripts/                 <- validate.py + qe_common.py (stdlib only)
+    scripts/                 <- validate.py, triage_summary.py, qe_common.py (stdlib only)
   evals/us-quality-gate/     <- eval cases + runner
   examples/qe-artifacts/PAY-101/  <- worked example outputs
+  examples/ci/               <- GitHub Actions triage + self-heal workflow, sample report
 ```
 
 The scripts use only the Python 3 standard library.

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="e2e" tests="7" failures="5" time="94.2">
+  <testsuite name="checkout/promo.spec.ts" tests="4" failures="2" time="41.0">
+    <testcase name="TC-001 applies valid promo code @story:PAY-101" classname="checkout/promo.spec.ts" time="6.1">
+      <failure message="expect(received).toBe(expected)">Error: expect(received).toBe(expected)
+
+Expected: "18.00"
+Received: "20.00"
+
+    at tests/checkout/promo.spec.ts:24:33
+Cart subtotal 20.00, code SAVE10 applied, discount line shown as "SAVE10 -$0.00"</failure>
+    </testcase>
+    <testcase name="TC-002 rejects expired code @story:PAY-101" classname="checkout/promo.spec.ts" time="30.0">
+      <failure message="TimeoutError: locator.fill: Timeout 30000ms exceeded.">TimeoutError: locator.fill: Timeout 30000ms exceeded.
+Call log:
+  - waiting for locator('#promo-input')
+    at tests/pages/checkout.page.ts:12:22
+Note: DOM snapshot contains &lt;input data-testid="promo-code" name="promo"&gt;</failure>
+    </testcase>
+    <testcase name="TC-003 rejects unknown code @story:PAY-101" classname="checkout/promo.spec.ts" time="2.4"/>
+    <testcase name="TC-004 minimum spend message @story:PAY-101" classname="checkout/promo.spec.ts" time="2.5"/>
+  </testsuite>
+  <testsuite name="account/login.spec.ts" tests="3" failures="3" time="53.2">
+    <testcase name="TC-101 login with valid credentials" classname="account/login.spec.ts" time="17.7">
+      <failure message="Error: connect ECONNREFUSED 10.0.4.17:8443">Error: connect ECONNREFUSED 10.0.4.17:8443
+    at auth-service health check (fixtures/auth.ts:8)</failure>
+    </testcase>
+    <testcase name="TC-102 login with wrong password" classname="account/login.spec.ts" time="17.8">
+      <failure message="Error: connect ECONNREFUSED 10.0.4.17:8443">Error: connect ECONNREFUSED 10.0.4.17:8443
+    at auth-service health check (fixtures/auth.ts:8)</failure>
+    </testcase>
+    <testcase name="TC-103 locked account" classname="account/login.spec.ts" time="17.7">
+      <failure message="Error: connect ECONNREFUSED 10.0.4.17:8443">Error: connect ECONNREFUSED 10.0.4.17:8443
+    at auth-service health check (fixtures/auth.ts:8)</failure>
+    </testcase>
+  </testsuite>
+</testsuites>

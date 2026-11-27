@@ -1,0 +1,222 @@
+# QE triage and self-heal on a failed test run: EXAMPLE
+#
+# Copy to .github/workflows/qe-triage.yml in the repository that runs your tests, then
+# change everything marked CHANGE ME. Full setup notes: README.md next to this file.
+#
+# Flow:
+#   1. Your test workflow fails and has uploaded its reports as an artifact.
+#   2. triage:     the triage-analyst agent classifies the failures. Code then validates
+#                  the file and decides whether self-heal may run.
+#   3. self-heal:  only if eligible, and only after a person approves the "self-heal"
+#                  environment. The self-heal-fixer agent commits a fix on a branch; this
+#                  job (not Claude) re-checks the diff with the guardrail, pushes the
+#                  branch and opens a PR. Claude never gets push rights.
+
+name: QE triage
+
+on:
+  workflow_run:
+    workflows: ["E2E Tests"]          # CHANGE ME: the `name:` of your test workflow
+    types: [completed]
+
+permissions:
+  contents: read
+  actions: read                       # to download the failed run's artifacts
+
+env:
+  PLUGIN_REPO: ftchen93/claude-agent  # CHANGE ME: the repo that holds the qe-workflow plugin
+  PLUGIN_REF: main                    # CHANGE ME: pin a tag or commit SHA in production
+  REPORT_ARTIFACT: test-results       # CHANGE ME: artifact name your test workflow uploads
+  CLAUDE_CODE_VERSION: latest         # CHANGE ME: pin a version in production
+  RUN_ID: ${{ github.event.workflow_run.id }}
+
+jobs:
+  triage:
+    # Only failed runs, and never runs from forks: workflow_run has access to secrets,
+    # and reports from a fork are untrusted input to the model.
+    if: >-
+      github.event.workflow_run.conclusion == 'failure' &&
+      github.event.workflow_run.head_repository.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      heal_eligible: ${{ steps.route.outputs.heal_eligible }}
+    steps:
+      - name: Check out the tested commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          persist-credentials: false
+
+      - name: Check out the QE plugin
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.PLUGIN_REPO }}
+          ref: ${{ env.PLUGIN_REF }}
+          path: .qe-plugin
+          persist-credentials: false
+
+      - name: Download test reports from the failed run
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.REPORT_ARTIFACT }}
+          path: test-results
+          run-id: ${{ env.RUN_ID }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install Claude Code
+        run: npm install -g "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}"
+
+      - name: Triage with the triage-analyst agent
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          RUN_URL: ${{ github.event.workflow_run.html_url }}
+          BUILD_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          claude -p "Triage test run ${RUN_ID} (pipeline: ${RUN_URL}, build: ${BUILD_SHA}). \
+          Reports are in ./test-results/. The tested source is in the current directory. \
+          Write the triage file to ./qe-artifacts/runs/${RUN_ID}/06-triage-${RUN_ID}.json." \
+            --plugin-dir .qe-plugin/qe-workflow \
+            --agent qe-workflow:triage-analyst \
+            --permission-mode dontAsk \
+            --allowedTools "Skill,Read,Write,Glob,Grep,Bash(python3:*)" \
+            --max-budget-usd 3 \
+            --output-format json > triage-claude.json
+
+      - name: Validate the triage file
+        run: python3 .qe-plugin/qe-workflow/shared/scripts/validate.py triage "qe-artifacts/runs/${RUN_ID}/06-triage-${RUN_ID}.json"
+
+      - name: Summarise and decide routing
+        id: route
+        run: python3 .qe-plugin/qe-workflow/shared/scripts/triage_summary.py "qe-artifacts/runs/${RUN_ID}/06-triage-${RUN_ID}.json" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload the triage result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: qe-triage-${{ env.RUN_ID }}
+          path: |
+            qe-artifacts/
+            triage-claude.json
+
+  self-heal:
+    needs: triage
+    if: needs.triage.outputs.heal_eligible == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    # CHANGE ME: create an environment named "self-heal" with required reviewers
+    # (Settings > Environments). The job then waits for a person to approve it.
+    environment: self-heal
+    permissions:
+      contents: write                 # push the self-heal branch (done by this job, not Claude)
+      pull-requests: write            # open the PR
+    env:
+      BASE_SHA: ${{ github.event.workflow_run.head_sha }}
+      HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+      HEAL_BRANCH: self-heal/${{ github.event.workflow_run.id }}
+      # CHANGE ME: the command that runs one test file. The prompt and the tool allowlist both
+      # use it, so the agent cannot run variations of it.
+      TEST_CMD: npx playwright test
+    steps:
+      - name: Check out the tested commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.BASE_SHA }}
+          fetch-depth: 0
+
+      - name: Check out the QE plugin
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.PLUGIN_REPO }}
+          ref: ${{ env.PLUGIN_REF }}
+          path: .qe-plugin
+          persist-credentials: false
+
+      - name: Download the triage result
+        uses: actions/download-artifact@v4
+        with:
+          name: qe-triage-${{ env.RUN_ID }}
+          path: .
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install Claude Code
+        run: npm install -g "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}"
+
+      # CHANGE ME: install what your tests need so the agent can re-run healed tests.
+      - name: Install test dependencies
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+
+      - name: Set a git identity for the agent's commit
+        run: |
+          git config user.name "qe-self-heal[bot]"
+          git config user.email "qe-self-heal@users.noreply.github.com"
+
+      - name: Heal with the self-heal-fixer agent
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        # Allowed: read and edit files, run the plugin scripts, local git commands, and the
+        # test runner. Not allowed: git push, gh, network tools, anything else.
+        run: |
+          claude -p "Heal the failures in ./qe-artifacts/runs/${RUN_ID}/06-triage-${RUN_ID}.json \
+          that are routed to pipeline-self-heal. Work in the current checkout. Create the branch \
+          ${HEAL_BRANCH} and commit your fix there. Do not push and do not open a PR: this \
+          job does that. Re-run each healed test with exactly: ${TEST_CMD} <test file> --repeat-each=3 --retries=0. \
+          Write a summary to ./qe-artifacts/runs/${RUN_ID}/07-heal-${RUN_ID}.md." \
+            --plugin-dir .qe-plugin/qe-workflow \
+            --agent qe-workflow:self-heal-fixer \
+            --permission-mode dontAsk \
+            --allowedTools "Skill,Read,Edit,Write,Glob,Grep,Bash(python3:*),Bash(git checkout:*),Bash(git switch:*),Bash(git add:*),Bash(git commit:*),Bash(git diff:*),Bash(git status:*),Bash(git log:*),Bash(git restore:*),Bash(${TEST_CMD}:*)" \
+            --max-budget-usd 8 \
+            --output-format json > heal-claude.json
+
+      - name: Check the agent left a branch
+        id: branch
+        run: |
+          if git rev-parse --verify --quiet "refs/heads/${HEAL_BRANCH}" >/dev/null; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "No self-heal branch was created. See heal-claude.json in the artifacts." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      # The guardrail runs again here, outside the model's control, on exactly what will
+      # be pushed. If it fails, nothing is pushed.
+      - name: Guardrail on the heal diff
+        if: steps.branch.outputs.exists == 'true'
+        run: python3 .qe-plugin/qe-workflow/skills/pipeline-self-heal/scripts/check_heal_diff.py "${BASE_SHA}...${HEAL_BRANCH}"
+
+      - name: Push the branch and open a PR
+        if: steps.branch.outputs.exists == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git push origin "${HEAL_BRANCH}"
+          NOTES="qe-artifacts/runs/${RUN_ID}/07-heal-${RUN_ID}.md"
+          {
+            echo "Automated self-heal for failed run ${{ github.event.workflow_run.html_url }}."
+            echo
+            echo "The guardrail passed: no assertion, product-code or sleep changes."
+            echo "Opened as a draft: mark it ready once this PR's own test run is green and a test owner has reviewed it."
+            echo
+            if [ -f "$NOTES" ]; then cat "$NOTES"; fi
+          } > pr-body.md
+          gh pr create --draft --base "${HEAD_BRANCH}" --head "${HEAL_BRANCH}" \
+            --title "Self-heal: tests from run ${RUN_ID}" --body-file pr-body.md
+
+      - name: Upload the heal result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: qe-self-heal-${{ env.RUN_ID }}
+          path: |
+            qe-artifacts/
+            heal-claude.json
