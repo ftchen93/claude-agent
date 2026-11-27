@@ -8,5 +8,6 @@ To learn and build claude agent
   automation feasibility and scripting, test run triage, pipeline self-heal, defect raising
   and Definition of Done.
 - [`docs/qe-skills-design-review.md`](docs/qe-skills-design-review.md): design review of the QE-workflow-as-skills approach.
+- [`docs/qe-gap-analysis-and-revised-flow.md`](docs/qe-gap-analysis-and-revised-flow.md): gap analysis of the QE workflow against the playbook, with a revised flow, change backlog, metrics and rollout.
 - [`docs/references/ai-native-sdlc-playbook.md`](docs/references/ai-native-sdlc-playbook.md): reference notes on Anthropic's *AI-native SDLC playbook*, with a map to `qe-workflow`.
 - `.claude-plugin/marketplace.json`: makes this repo installable as a plugin marketplace.
